@@ -4,7 +4,7 @@
 
 Built and configured an osTicket help desk training environment on a Windows virtual machine hosted in Microsoft Azure.
 
-Completed a CourseCareers training lab and repeated exercises to strengthen my understanding of application installation, database configuration, help desk administration, access control, service-level agreements (SLAs), and incident management.
+As part of my CourseCareers IT training, I installed and configured an osTicket help desk environment and revisited key exercises to strengthen my understanding of application installation, database configuration, help desk administration, access control, service-level agreements (SLAs), and incident management.
 
 I also developed an independent CFO laptop troubleshooting scenario to practice ticket creation, technician assignment, diagnostic planning, documentation, and ticket closure.
 
