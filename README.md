@@ -2,331 +2,217 @@
 
 ## Project Overview
 
-Built and configured an osTicket help desk training environment on a Windows virtual machine hosted in Microsoft Azure.
+Deployed an **osTicket v1.15.8** help desk training environment on a Microsoft Azure Windows virtual machine as part of my CourseCareers IT studies. Configured web and database dependencies, support workflows, agent permissions, SLAs, and simulated incident tickets.
 
-As part of my CourseCareers IT training, I installed and configured an osTicket help desk environment and revisited key exercises to strengthen my understanding of application installation, database configuration, help desk administration, access control, service-level agreements (SLAs), and incident management.
+I also designed an independent **fictional CFO laptop power-issue scenario** to practice intake, triage, troubleshooting documentation, and closure.
 
-I also developed an independent CFO laptop troubleshooting scenario to practice ticket creation, technician assignment, diagnostic planning, documentation, and ticket closure.
+## Technologies & Environment
 
-**Lab Disclaimer:** This project was completed in a controlled training environment. All users and incidents were simulated. The CFO laptop repair described in the ticket was hypothetical; no physical hardware testing or repair was performed.
+| Component | Lab environment |
+|---|---|
+| Cloud VM | Microsoft Azure `osticket-vm` — Windows 11 Pro, Standard D2s v3 (2 vCPUs, 8 GiB RAM) |
+| Remote access | Remote Desktop Protocol (RDP) |
+| Web server | IIS, CGI, PHP Manager for IIS, IIS Rewrite Module |
+| Application runtime | PHP 7.3.8 |
+| Database | MySQL 5.5.62 and HeidiSQL |
+| Ticketing platform | osTicket v1.15.8 |
 
-## Technologies and Skills
+## 1. Environment Setup & Installation
 
-- Microsoft Azure Virtual Machines
-- Windows and Remote Desktop Protocol (RDP)
-- Internet Information Services (IIS)
-- CGI and PHP
-- MySQL and HeidiSQL
-- osTicket Administration
-- Role-Based Access Control (RBAC)
-- Authentication and Authorization
-- Principle of Least Privilege
-- Service-Level Agreements (SLAs)
-- Ticket Routing, Escalation, and Closure
-- Technical Documentation and Troubleshooting
+### 1.1 Deploy and access the Azure VM
 
----
+1. Provisioned the Windows virtual machine `osticket-vm` in Microsoft Azure.
+2. Connected from a Windows laptop using RDP.
+3. Extracted the CourseCareers osTicket installation package within the VM.
 
-## 1. Environment Setup and Installation
+**Result:** A remotely accessible Windows environment ready for application setup.
 
-### Azure Virtual Machine
+![Azure virtual machine overview](screenshots/01-Azure-VM.png)
 
-![Azure VM Overview](screenshots/01-Azure-VM.png)
+### 1.2 Enable IIS and configure PHP
 
-Prepared an Azure-hosted Windows virtual machine as the environment for installing and configuring osTicket.
+1. Opened **Control Panel → Programs → Turn Windows features on or off**.
+2. Enabled **Internet Information Services → World Wide Web Services → Application Development Features → CGI**.
+3. Installed PHP Manager for IIS and the IIS Rewrite Module.
+4. Extracted PHP 7.3.8 to `C:\PHP` and installed the required Visual C++ Redistributable.
+5. In **IIS Manager → PHP Manager**, registered `C:\PHP\php-cgi.exe`.
+6. Restarted IIS and enabled `php_imap.dll`, `php_intl.dll`, and `php_opcache.dll`.
 
-Accessed the virtual machine remotely from my Lenovo Windows laptop using Remote Desktop.
+**Result:** IIS and PHP dependencies were configured for osTicket.
 
-**Skills demonstrated:** Cloud infrastructure, virtualization, Windows administration, and remote connectivity.
+![IIS and CGI configuration](screenshots/02-IIS-configuration.png)
 
-### IIS and CGI Configuration
+### 1.3 Configure the MySQL database
 
-![IIS Configuration](screenshots/02-IIS-configuration.png)
+1. Installed MySQL and completed its local configuration wizard.
+2. Opened HeidiSQL and connected to the local MySQL server.
+3. Created the `osTicket` database for the installation.
+4. After installing osTicket, inspected the populated tables in HeidiSQL.
 
-Enabled Internet Information Services (IIS) and CGI functionality to support the PHP-based osTicket application.
+**Result:** Verified that the application database and its tables were accessible. 
 
-This exercise reinforced how web applications depend on properly configured server components.
+![osTicket database tables in HeidiSQL](screenshots/03-MySQL-Database.png)
 
-**Skills demonstrated:** Windows web server configuration, IIS, CGI, and application dependencies.
+### 1.4 Deploy and verify osTicket
 
-### MySQL Database
+1. Extracted the osTicket v1.15.8 package and copied its `upload` directory into `C:\inetpub\wwwroot`.
+2. Renamed that directory to `osTicket` and opened the local site through IIS.
+3. Renamed `include\ost-sampleconfig.php` to `include\ost-config.php` and prepared the configuration file for installation.
+4. Entered the help desk settings and `osTicket` database details in the browser installer.
+5. Selected **Install Now!** and verified the successful installation page.
 
-![MySQL Database](screenshots/03-MySQL-Database.png)
+**Result:** The osTicket application was installed and accessible for administration.
 
-Configured MySQL and used HeidiSQL to examine the osTicket database and application tables.
+![Successful osTicket installation](screenshots/04-osticket-Installation.png)
 
-The database provides the storage infrastructure for ticket records, user information, and application configuration.
-
-**Skills demonstrated:** Database fundamentals, MySQL configuration, and application infrastructure.
-
-### osTicket Installation
-
-![osTicket Installation Success](screenshots/04-osticket-Installation.png)
-
-Completed the osTicket installation process and confirmed that the application was accessible for additional administrative configuration.
-
-The installation screen also identified post-installation security tasks, including restricting configuration file permissions and removing installation files.
-
-**Skills demonstrated:** Application deployment, installation verification, and awareness of post-installation security requirements.
-
----
+**Local VM URLs:** Staff login: `http://localhost/osTicket/scp/login.php` · End-user portal: `http://localhost/osTicket/`. 
 
 ## 2. Help Desk Administration
 
-### Agent Roles and Permissions
+### 2.1 Roles and permissions
 
-![Agent Roles](screenshots/05-agent-roles.png)
+1. Opened **Admin Panel → Agents → Roles**.
+2. Configured and reviewed the **Supreme Admin** role and its ticket permissions.
+3. Compared permitted actions such as assigning, editing, transferring, and closing tickets.
 
-Reviewed and configured agent roles to understand how permissions determine which actions support technicians can perform.
+**Lesson:** Authentication identifies an account; authorization determines which actions it may perform.
 
-This provided practical exposure to role-based access control and the importance of assigning appropriate permissions.
+![Supreme Admin ticket permissions](screenshots/05-agent-roles.png)
 
-**Skills demonstrated:** RBAC, authorization, permission management, and least privilege.
+### 2.2 Departments and teams
 
-### Department Configuration
+1. Opened **Admin Panel → Agents → Departments** and configured **SysAdmins** alongside **Support**.
+2. Set SysAdmins as a top-level department and removed the unused Maintenance department during the lab workflow.
+3. Opened **Admin Panel → Agents → Teams** and created the **Online Banking** team.
+4. Reviewed how departmental assignments affect ticket visibility and escalation.
 
-![Departments](screenshots/06-departments.png)
+![Intermediate department configuration](screenshots/06-departments.png)
 
-Configured and reviewed help desk departments, including Support and SysAdmins, to understand how organizational structure influences ticket ownership and departmental access.
+![Support teams](screenshots/07-support-teams.png)
 
-The screenshot captures an intermediate stage of the lab configuration, including the Maintenance department before its removal.
+### 2.3 Agents and end users
 
-**Skills demonstrated:** Department administration, ticket routing, organizational structure, and access control.
+1. Opened **Admin Panel → Agents → Add New**.
+2. Configured **John Doe** in Support and **Jane Doe** in SysAdmins.
+3. Used **Agent Panel → Users → Add User** to create simulated end users **Karen** and **Ken**.
+4. Later added **Celeste Brown** for the independent CFO scenario.
 
-### Support Teams
+**Result:** Practiced user provisioning, department assignment, and agent-versus-administrator workflows.
 
-![Support Teams](screenshots/07-support-teams.png)
+![Configured support agents](screenshots/08-support-agents.png)
 
-Configured support teams to explore how agents can be organized for different ticket workflows and collaborative support responsibilities.
+### 2.4 SLAs and help topics
 
-**Skills demonstrated:** Team administration, workflow organization, and support operations.
+1. Opened **Admin Panel → Manage → SLA** and configured:
 
-### Support Agents
+   | SLA plan | Grace period | Training schedule |
+   |---|---:|---|
+   | Sev-A | 1 hour | 24/7 |
+   | Sev-B | 4 hours | 24/7 |
+   | Sev-C | 8 hours | Business Hours |
 
-![Support Agents](screenshots/08-support-agents.png)
+2. Opened **Admin Panel → Manage → Help Topics**.
+3. Configured or reviewed topics for **Business Critical Outage, Personal Computer Issues, Equipment Request, Password Reset,** and **Other**.
 
-Configured simulated technician accounts, including John Doe in Support and Jane Doe in SysAdmins.
+**Result:** Created differentiated service targets and categories for support requests. The SLA screenshot verifies grace periods.
 
-Practiced ticket assignment and department-based access restrictions using the training accounts.
+![Configured SLA plans](screenshots/09-SLA-plans.png)
 
-Some administrative actions and ticket documentation were also performed through the Davion Brown administrator account rather than the assigned technician account.
+![Help topics](screenshots/10-help-topics.png)
 
-This distinction reinforced the importance of accurate account attribution and technician accountability.
+## 3. Ticket Management & Access Control
 
-**Skills demonstrated:** Agent account administration, technician assignment, authorization, and activity tracking.
+### 3.1 Banking outage: incident intake and escalation
 
-### Service-Level Agreements
+1. Created a simulated ticket reporting that mobile and online banking were unavailable.
+2. Viewed ticket **#155971** as support agent John Doe.
+3. Examined its initial **Normal** priority, **Support** department, **Default SLA**, and unassigned status.
+4. Evaluated the outage as business-critical and practiced escalation using the **Sev-A (1-hour)** training plan.
+5. Investigated why department access could restrict John from viewing or changing a transferred ticket.
 
-![SLA Plans](screenshots/09-SLA-plans.png)
+**Lesson:** A ticket's initial defaults may not match its business impact. Transferring a ticket can change who is authorized to work on it.
 
-Configured three service-level agreement plans with different grace periods.
+![Banking outage ticket: initial properties](screenshots/11-banking-incident.png)
 
-| SLA | Grace Period |
-|---|---|
-| Sev-A | 1 hour |
-| Sev-B | 4 hours |
-| Sev-C | 8 hours |
+### 3.2 Investigate access restrictions
 
-Practiced selecting SLA plans based on simulated incident requirements, business impact, and service expectations.
+1. Opened **Admin Panel → Agents** and examined John's department access and effective role.
+2. Reviewed the difference between primary-department access and additional permissions.
+3. Compared administrator visibility with the permissions available to a Support agent.
 
-**Skills demonstrated:** SLA configuration, incident prioritization, and service management.
+**Result:** Investigated role-based permissions and department access restrictions to understand how authorization affects ticket visibility and technician responsibilities.
 
-### Help Topics
+![Agent department-access configuration](screenshots/12-access-control.png)
 
-![Help Topics](screenshots/10-help-topics.png)
+### 3.3 Accounting Adobe issue
 
-Reviewed and configured help topics for different support requests, including business-critical outages, password resets, equipment requests, and computer-related issues.
-
-Help topics help classify incoming incidents and organize support workflows.
-
-**Skills demonstrated:** Ticket classification, incident intake, and workflow configuration.
-
----
-
-## 3. Ticket Management and Access Control
-
-### Banking Outage — Initial Incident Assessment
-
-![Banking Incident](screenshots/11-banking-incident.png)
-
-Created and reviewed a simulated incident involving an outage of an organization's online and mobile banking services.
-
-Examined the ticket's initial properties, including:
-
-- Priority
-- Department
-- SLA plan
-- Technician assignment
-
-The initial ticket settings did not necessarily reflect the potential business impact of a widespread banking outage.
-
-This exercise reinforced the importance of evaluating affected users, service availability, and operational impact when determining incident severity.
-
-**Skills demonstrated:** Incident intake, business-impact assessment, ticket management, and escalation.
-
-### Department-Based Access Control
-
-![Department Access Control](screenshots/12-access-control.png)
-
-Investigated why a Support technician could no longer access the banking incident after the ticket was transferred to the SysAdmins department.
-
-The technician could successfully authenticate to osTicket, but departmental authorization restricted access to the transferred ticket.
-
-Used the administrator account to review and modify training permissions, helping identify how agent roles and department access affect ticket visibility.
-
-**Key technical lesson:**
-
-Authentication verifies a user's identity, while authorization determines which resources and actions that user is permitted to access.
-
-The exercise also reinforced the principle of least privilege: technicians should receive only the permissions necessary to perform their assigned responsibilities.
-
-**Skills demonstrated:** Authorization troubleshooting, RBAC, least privilege, and ticket escalation.
-
----
+Worked through a simulated Adobe software issue for the Accounting department, using **Support** and the **Sev-B (4-hour)** SLA. The closed-ticket queue confirms ticket **#603382** was closed under **John Doe**.
 
 ## 4. Independent CFO Laptop Troubleshooting Scenario
 
-### Create a Fictional End User
+### 4.1 Create the end user and ticket
 
-![CFO User Account](screenshots/13-cfo-user-account.png)
+Created fictional CFO **Celeste Brown** and entered ticket **#936362** about a company laptop that would not power on.
 
-Created a fictional CFO end-user account named Celeste Brown to practice user administration and develop an independent support scenario beyond the instructor-led exercises.
+![Fictional CFO end-user account](screenshots/13-cfo-user-account.png)
 
-**Skills demonstrated:** End-user account creation and help desk administration.
-
-### Create and Configure the Incident
-
-![CFO Laptop Ticket](screenshots/14-cfo-ticket.png)
-
-Created Ticket **#936362** for a fictional CFO reporting that her company-issued laptop would not power on.
-
-Configured the following properties:
-
-| Property | Configuration |
+| Ticket property | Configuration |
 |---|---|
-| Issue | CFO laptop will not power on |
+| Subject | CFO laptop will not power on |
 | Priority | Normal |
 | Department | Support |
 | SLA | Sev-B (4 hours) |
-| Assigned Technician | John Doe |
-| Help Topic | Personal Computer Issues |
-| Ticket Source | Phone |
+| Assigned technician | John Doe |
+| Help topic | Personal Computer Issues |
+| Source | Phone |
 
-The reported issue prevented the CFO from accessing work files and preparing for an upcoming financial presentation.
+The scenario described a time-sensitive financial presentation and inability to access work files.
 
-This scenario provided additional practice in evaluating business impact and documenting technical incidents.
+![CFO ticket configuration](screenshots/14-cfo-ticket.png)
 
-**Skills demonstrated:** Ticket creation, technician assignment, SLA selection, and incident documentation.
+### 4.2 Record a troubleshooting plan
 
-### Document the Troubleshooting Process
+Entered an internal note describing a **proposed**, not physically executed, diagnostic sequence:
 
-![CFO Troubleshooting Notes](screenshots/15-cfo-troubleshooting.png)
+1. Check power LEDs, fan activity, and startup symptoms.
+2. Inspect the power adapter, outlet, cable, and charging port.
+3. If available, try a known-good compatible charger.
+4. Distinguish a power failure from a display or startup issue.
+5. Consider a manufacturer-approved power reset.
+6. Assess business impact and the need for a loaner laptop.
 
-Created an internal troubleshooting note outlining a structured approach to diagnosing the laptop's reported power issue.
+**Simulated outcome:** A later note documented a *hypothetical* faulty charger replacement that restored startup. No hardware diagnosis or repair was actually performed.
 
-**Troubleshooting plan:**
+![CFO troubleshooting documentation](screenshots/15-cfo-troubleshooting.png)
 
-1. Identify symptoms by checking power indicators, fan activity, and signs of system startup.
-2. Verify the power source by inspecting the charging adapter, cable connections, electrical outlet, and charging port.
-3. Test with a known-good compatible charger, if available.
-4. Determine whether the problem involves a complete power failure, display issue, or startup problem.
-5. Consider a manufacturer-approved power reset when appropriate.
-6. Evaluate business impact and consider an approved loaner laptop to maintain productivity.
+### 4.3 Close the ticket and inspect the audit trail
 
-A later internal note documented a hypothetical resolution involving a faulty power adapter that was replaced, restoring normal laptop startup.
+Reviewed the closed-ticket queue and confirmed:
 
-**Training clarification:** No physical laptop was examined or repaired. The diagnosis and resolution were simulated to practice support documentation and ticket closure.
+- **#936362 — CFO laptop issue:** closed by the **Davion Brown administrator account**.
+- **#603382 — Accounting Adobe issue:** closed by **John Doe**.
 
-The internal notes were entered using the Davion Brown administrator account, although the ticket was assigned to John Doe.
+Although CFO ticket #936362 was assigned to John Doe, **I mistakenly documented the troubleshooting notes and closed it while signed in as administrator**. The history preserved the account that actually performed the work.
 
-**Skills demonstrated:** Structured troubleshooting, diagnostic planning, business-impact assessment, technical documentation, and accurate activity recording.
+**Lesson:** Assignment and action attribution are different. Correct technician sign-in matters for permission testing and an accurate audit trail.
 
-### Ticket Audit Trail and Closure
-
-![Closed Tickets Dashboard](screenshots/16-closed-tickets.png)
-
-Reviewed the osTicket Closed Tickets queue and verified two completed simulated incidents:
-
-- CFO laptop power issue — Closed by Davion Brown.
-- Accounting department Adobe software issue — Closed by John Doe.
-
-The closed-ticket records demonstrate how osTicket tracks ticket status, closure information, and the accounts responsible for support activity.
-
-**Audit trail observation:**
-
-Although the CFO incident was assigned to John Doe, troubleshooting documentation and ticket closure were performed using the Davion Brown administrator account.
-
-Reviewing this history reinforced the importance of using the correct technician account and accurately recording who performed each action.
-
-The banking outage ticket's final closure was not verified by this screenshot.
-
-**Skills demonstrated:** Ticket lifecycle management, audit trails, incident closure, and technician accountability.
-
----
+![Closed tickets and responsible accounts](screenshots/16-closed-tickets.png)
 
 ## 5. Key Lessons Learned
 
-### Infrastructure and Application Support
+- **Application dependencies:** IIS, PHP, and MySQL must work together to support a web-based help desk.
+- **Access control:** Successful sign-in does not guarantee permission to view or change a ticket.
+- **Prioritization:** Business impact and urgency matter more than the initial ticket defaults.
+- **Ticket documentation:** Record observations, planned tests, simulated outcomes, and verified actions distinctly.
+- **Accountability:** Ticket history reveals who actually performed an action, not merely who was assigned.
+- **Security:** A successful installation does not imply completed hardening.
 
-Learned how a web-based ticketing system depends on a functioning web server, PHP runtime, and database.
+## 6. Project Scope & Security Notes
 
-### Authentication vs. Authorization
+This lab used **simulated users and incidents**, legacy training software, and a local virtual-machine environment. The banking, Adobe, and CFO incidents were not real organizational support requests. The CFO charger replacement was hypothetical.
 
-Developed a clearer understanding of the difference between successfully signing into a system and having permission to access specific resources.
-
-### Help Desk Administration
-
-Practiced configuring departments, teams, roles, agents, and service-level agreements.
-
-### Incident Prioritization
-
-Learned why incident severity should reflect business impact and urgency rather than relying solely on the requester's job title.
-
-### Structured Troubleshooting
-
-Practiced identifying symptoms, developing diagnostic plans, evaluating possible causes, and documenting next steps.
-
-### Technical Documentation
-
-Learned to distinguish planned troubleshooting steps, verified findings, and hypothetical resolutions.
-
-### Technician Accountability
-
-Observed how ticket history and account attribution help organizations determine who performed specific support actions.
-
-### Security and Least Privilege
-
-Learned why departmental access restrictions and appropriate permissions are important for protecting support information.
-
-Also recognized that successful application installation does not automatically mean a system has completed all required security-hardening steps.
-
----
-
-## 6. Project Scope and Limitations
-
-This project documents hands-on learning within a controlled training environment rather than production IT operations.
-
-The banking outage, Adobe software issue, and CFO laptop incident were simulated.
-
-The CFO laptop problem was not physically tested, and the documented power-adapter replacement was hypothetical.
-
-Some support actions were performed using the administrator account rather than the assigned technician account. These actions are accurately identified in the project documentation.
-
-The installation followed an older training checklist and should not be treated as a recommendation to deploy outdated software versions in a production environment.
-
-The primary objective was to strengthen practical knowledge of help desk administration, access control, incident management, and technical documentation.
-
----
+The post-installation security cleanup steps—removing the setup directory and restricting write access to ost-config.php—were not completed during the lab. As a result, security warnings remained visible in the screenshots.
 
 ## 7. Career Relevance
 
-This project supports my transition into entry-level information technology roles, including:
-
-- Help Desk Technician
-- IT Support Specialist
-- Service Desk Analyst
-- Junior Network Support Technician
-
-Through this lab, I gained practical experience working with a ticketing platform, configuring support workflows, managing permissions, documenting simulated incidents, and troubleshooting authorization issues.
-
-I plan to continue building on these foundational skills through additional hands-on labs, technical training, and IT certification studies.
+This project demonstrates practical exposure to help desk administration, ticket intake, SLAs, permission troubleshooting, technical documentation, and ticket lifecycle tracking—skills relevant to entry-level **Help Desk Technician, IT Support Specialist,** and **Service Desk Analyst** roles.
